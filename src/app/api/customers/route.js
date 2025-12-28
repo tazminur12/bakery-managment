@@ -63,7 +63,23 @@ export async function GET(request) {
       .sort({ createdAt: -1 })
       .toArray();
 
-    return NextResponse.json({ customers });
+    // Calculate totalDue for each customer from their sales
+    const customersWithDue = await Promise.all(
+      customers.map(async (customer) => {
+        const sales = await db.collection("sales")
+          .find({ customerName: customer.name })
+          .toArray();
+
+        const totalDue = sales.reduce((sum, sale) => sum + (sale.dueAmount || 0), 0);
+
+        return {
+          ...customer,
+          totalDue: totalDue
+        };
+      })
+    );
+
+    return NextResponse.json({ customers: customersWithDue });
   } catch (error) {
     console.error("Fetch customers error:", error);
     return NextResponse.json(

@@ -240,7 +240,7 @@ export default function CustomersPage() {
                       {customer.notes || "-"}
                     </td>
                     <td className="px-6 py-4 font-medium text-red-600">
-                      {customer.totalDue > 0 ? `৳ ${customer.totalDue.toLocaleString()}` : "-"}
+                      {customer.totalDue && customer.totalDue > 0 ? `৳ ${customer.totalDue.toLocaleString('en-BD', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "-"}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">

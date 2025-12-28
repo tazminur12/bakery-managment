@@ -25,15 +25,51 @@ async function generateEmployeeId(db) {
   return `${prefix}${nextSequence.toString().padStart(4, "0")}`;
 }
 
-export async function GET() {
+export async function GET(request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
     const client = await clientPromise;
     const db = client.db(process.env.MONGODB_DB_NAME || "bakery-management");
+
+    if (id) {
+      if (!ObjectId.isValid(id)) {
+        return NextResponse.json({ error: "Invalid ID format" }, { status: 400 });
+      }
+      
+      const employee = await db.collection("employees").findOne({ _id: new ObjectId(id) });
+      
+      if (!employee) {
+        return NextResponse.json({ error: "Employee not found" }, { status: 404 });
+      }
+
+      // Fetch employee's salary payment history
+      const salaryPayments = await db.collection("salaryPayments")
+        .find({ employeeId: new ObjectId(id) })
+        .sort({ paymentDate: -1, createdAt: -1 })
+        .toArray();
+
+      // Calculate totals
+      const totalPaid = salaryPayments.reduce((sum, payment) => sum + (payment.amount || 0), 0);
+      const totalPayments = salaryPayments.length;
+
+      return NextResponse.json({ 
+        employee: {
+          ...employee,
+          stats: {
+            totalPaid,
+            totalPayments
+          },
+          salaryHistory: salaryPayments
+        } 
+      });
+    }
     
     const employees = await db.collection("employees")
       .find({})

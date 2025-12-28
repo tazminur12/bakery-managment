@@ -14,6 +14,7 @@ export async function GET() {
     const client = await clientPromise;
     const db = client.db(process.env.MONGODB_DB_NAME || "bakery-management");
     
+    // Fetch only regular expenses (not including salary payments)
     const expenses = await db.collection("expenses")
       .find({})
       .sort({ date: -1, createdAt: -1 })

@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { use } from "react";
 import { 
   ArrowLeft, Loader2, User, Phone, MapPin, 
-  ShoppingBag, CreditCard, DollarSign, Calendar 
+  ShoppingBag, CreditCard, DollarSign, Calendar, CheckCircle
 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 export default function CustomerDetailsPage({ params }) {
   const router = useRouter();
@@ -16,27 +17,80 @@ export default function CustomerDetailsPage({ params }) {
   const [customer, setCustomer] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isPaymentOpen, setIsPaymentOpen] = useState(false);
+  const [selectedSale, setSelectedSale] = useState(null);
+  const [paymentAmount, setPaymentAmount] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("Cash");
+  const [paymentNotes, setPaymentNotes] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const fetchCustomer = async () => {
+    try {
+      const response = await fetch(`/api/customers?id=${id}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch customer details");
+      }
+      const data = await response.json();
+      setCustomer(data.customer);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchCustomer = async () => {
-      try {
-        const response = await fetch(`/api/customers?id=${id}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch customer details");
-        }
-        const data = await response.json();
-        setCustomer(data.customer);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     if (id) {
       fetchCustomer();
     }
   }, [id]);
+
+  const handlePayClick = (sale) => {
+    setSelectedSale(sale);
+    setPaymentAmount(sale.dueAmount?.toString() || "");
+    setPaymentMethod(sale.paymentMethod || "Cash");
+    setPaymentNotes("");
+    setIsPaymentOpen(true);
+  };
+
+  const handlePaymentSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedSale || !paymentAmount || parseFloat(paymentAmount) <= 0) {
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/payments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          saleId: selectedSale._id,
+          paymentAmount: parseFloat(paymentAmount),
+          paymentMethod,
+          notes: paymentNotes
+        })
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to record payment");
+      }
+
+      // Refresh customer data
+      await fetchCustomer();
+      setIsPaymentOpen(false);
+      setSelectedSale(null);
+      setPaymentAmount("");
+      setPaymentNotes("");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -169,12 +223,13 @@ export default function CustomerDetailsPage({ params }) {
                 <th className="px-6 py-4 text-right">মোট বিল</th>
                 <th className="px-6 py-4 text-right">জমা</th>
                 <th className="px-6 py-4 text-right">বাকি</th>
+                <th className="px-6 py-4 text-center">অ্যাকশন</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {customer.salesHistory?.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan="7" className="px-6 py-12 text-center text-gray-500">
                     কোনো লেনদেনের তথ্য পাওয়া যায়নি
                   </td>
                 </tr>
@@ -197,10 +252,23 @@ export default function CustomerDetailsPage({ params }) {
                       ৳ {sale.totalAmount}
                     </td>
                     <td className="px-6 py-4 text-sm text-green-600 font-medium text-right">
-                      ৳ {sale.paidAmount}
+                      ৳ {sale.paidAmount || 0}
                     </td>
                     <td className="px-6 py-4 text-sm text-red-600 font-medium text-right">
                       {sale.dueAmount > 0 ? `৳ ${sale.dueAmount}` : '-'}
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      {sale.dueAmount > 0 ? (
+                        <button
+                          onClick={() => handlePayClick(sale)}
+                          className="px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-lg hover:bg-green-700 transition-colors flex items-center gap-1 mx-auto"
+                        >
+                          <CheckCircle size={14} />
+                          পরিশোধ
+                        </button>
+                      ) : (
+                        <span className="text-xs text-green-600 font-medium">পরিশোধিত</span>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -209,6 +277,104 @@ export default function CustomerDetailsPage({ params }) {
           </table>
         </div>
       </div>
+
+      {/* Payment Dialog */}
+      <Dialog open={isPaymentOpen} onOpenChange={setIsPaymentOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>বাকি পরিশোধ করুন</DialogTitle>
+          </DialogHeader>
+          
+          {selectedSale && (
+            <form onSubmit={handlePaymentSubmit} className="space-y-4 py-4">
+              {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">{error}</div>}
+              
+              <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">মোট বিল:</span>
+                  <span className="font-medium">৳{selectedSale.totalAmount}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">জমা:</span>
+                  <span className="font-medium text-green-600">৳{selectedSale.paidAmount || 0}</span>
+                </div>
+                <div className="flex justify-between text-sm border-t pt-2">
+                  <span className="text-gray-600">বাকি:</span>
+                  <span className="font-medium text-red-600">৳{selectedSale.dueAmount}</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  পরিশোধের পরিমাণ <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  max={selectedSale.dueAmount}
+                  value={paymentAmount}
+                  onChange={(e) => setPaymentAmount(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  placeholder="পরিমাণ লিখুন"
+                  required
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  সর্বোচ্চ: ৳{selectedSale.dueAmount}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  পেমেন্ট মেথড
+                </label>
+                <select
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                >
+                  <option value="Cash">Cash</option>
+                  <option value="Bank Transfer">Bank Transfer</option>
+                  <option value="bKash">bKash</option>
+                  <option value="Nagad">Nagad</option>
+                  <option value="Rocket">Rocket</option>
+                  <option value="Card">Card</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  নোট (ঐচ্ছিক)
+                </label>
+                <textarea
+                  value={paymentNotes}
+                  onChange={(e) => setPaymentNotes(e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  placeholder="ট্রানজেকশন বা নোট লিখুন"
+                />
+              </div>
+
+              <DialogFooter>
+                <button
+                  type="button"
+                  onClick={() => setIsPaymentOpen(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  বাতিল
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? "পরিশোধ হচ্ছে..." : "পরিশোধ করুন"}
+                </button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

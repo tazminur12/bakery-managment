@@ -44,7 +44,7 @@ export default function Topbar({ toggleMobileMenu }) {
         </button>
 
         <h1 className="text-xl font-semibold text-gray-800 truncate">
-          Dashboard
+       আমির হামজা বেকারি সিস্টেম
         </h1>
       </div>
 

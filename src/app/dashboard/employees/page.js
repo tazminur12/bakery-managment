@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import { 
   Plus, Search, Edit, Trash2, User, Phone, 
   Calendar, CreditCard, FileText, MapPin, 
-  AlertCircle, Camera, Loader2, Users 
+  AlertCircle, Camera, Loader2, Users, Eye
 } from "lucide-react";
+import Link from "next/link";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ROLES_LIST } from "@/lib/constants";
 
@@ -204,6 +205,7 @@ export default function EmployeesPage() {
     }
   };
 
+
   const filteredEmployees = employees.filter(emp => 
     emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     emp.employeeId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -215,15 +217,15 @@ export default function EmployeesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Employees</h1>
-          <p className="text-gray-500">Manage staff details, salary, and roles</p>
+          <h1 className="text-2xl font-bold text-gray-900">কর্মচারী</h1>
+          <p className="text-gray-500">কর্মচারীর বিবরণ, বেতন এবং ভূমিকা পরিচালনা করুন</p>
         </div>
         <button
           onClick={() => { resetForm(); setIsAddOpen(true); }}
           className="flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
         >
           <Plus size={20} className="mr-2" />
-          Add Employee
+          নতুন কর্মচারী যোগ করুন
         </button>
       </div>
 
@@ -233,7 +235,7 @@ export default function EmployeesPage() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
           <input
             type="text"
-            placeholder="Search by Name, ID (BK-2025-XXXX), or Phone..."
+            placeholder="নাম, আইডি (BK-2025-XXXX), বা ফোন দিয়ে অনুসন্ধান করুন..."
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -250,7 +252,7 @@ export default function EmployeesPage() {
         ) : filteredEmployees.length === 0 ? (
           <div className="col-span-full text-center py-12 text-gray-500 bg-white rounded-xl border border-dashed border-gray-300">
             <Users size={48} className="mx-auto mb-4 text-gray-300" />
-            <p>No employees found</p>
+            <p>কোনো কর্মচারী পাওয়া যায়নি</p>
           </div>
         ) : (
           filteredEmployees.map((employee) => (
@@ -276,9 +278,9 @@ export default function EmployeesPage() {
                     </div>
                   </div>
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    employee.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                    employee.status === 'active' ? 'bg-green-100 text-green-700' : employee.status === 'inactive' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
                   }`}>
-                    {employee.status}
+                    {employee.status === 'active' ? 'সক্রিয়' : employee.status === 'inactive' ? 'নিষ্ক্রিয়' : 'বরখাস্ত'}
                   </span>
                 </div>
 
@@ -289,7 +291,7 @@ export default function EmployeesPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar size={16} className="text-gray-400" />
-                    <span>Joined: {new Date(employee.joiningDate).toLocaleDateString()}</span>
+                    <span>যোগদান: {new Date(employee.joiningDate).toLocaleDateString()}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <CreditCard size={16} className="text-gray-400" />
@@ -299,18 +301,27 @@ export default function EmployeesPage() {
               </div>
 
               <div className="bg-gray-50 px-6 py-3 border-t border-gray-100 flex justify-between items-center">
-                <button 
-                  onClick={() => handleEditClick(employee)}
-                  className="text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center gap-1"
+                <Link
+                  href={`/dashboard/employees/${employee._id}`}
+                  className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1 px-3 py-1.5 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                  title="বিস্তারিত দেখুন"
                 >
-                  <Edit size={16} /> Edit
-                </button>
-                <button 
-                  onClick={() => { setCurrentEmployee(employee); setIsDeleteOpen(true); }}
-                  className="text-red-600 hover:text-red-800 text-sm font-medium flex items-center gap-1"
-                >
-                  <Trash2 size={16} /> Delete
-                </button>
+                  <Eye size={16} /> বিস্তারিত
+                </Link>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => handleEditClick(employee)}
+                    className="text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center gap-1"
+                  >
+                    <Edit size={16} /> এডিট
+                  </button>
+                  <button 
+                    onClick={() => { setCurrentEmployee(employee); setIsDeleteOpen(true); }}
+                    className="text-red-600 hover:text-red-800 text-sm font-medium flex items-center gap-1"
+                  >
+                    <Trash2 size={16} /> মুছে ফেলুন
+                  </button>
+                </div>
               </div>
             </div>
           ))
@@ -326,7 +337,7 @@ export default function EmployeesPage() {
       }}>
         <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{isEditOpen ? "Edit Employee" : "Add New Employee"}</DialogTitle>
+            <DialogTitle>{isEditOpen ? "কর্মচারী এডিট করুন" : "নতুন কর্মচারী যোগ করুন"}</DialogTitle>
           </DialogHeader>
 
           <form onSubmit={isEditOpen ? handleUpdateEmployee : handleAddEmployee} className="space-y-6 py-4">
@@ -351,19 +362,19 @@ export default function EmployeesPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Full Name *</label>
+                <label className="text-sm font-medium text-gray-700">পূর্ণ নাম *</label>
                 <input
                   required
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
-                  placeholder="Employee Name"
+                  placeholder="কর্মচারীর নাম"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Phone Number *</label>
+                <label className="text-sm font-medium text-gray-700">ফোন নম্বর *</label>
                 <input
                   required
                   name="phone"
@@ -375,7 +386,7 @@ export default function EmployeesPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Role *</label>
+                <label className="text-sm font-medium text-gray-700">ভূমিকা *</label>
                 <select
                   name="role"
                   value={formData.role}
@@ -389,7 +400,7 @@ export default function EmployeesPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Salary (Monthly) *</label>
+                <label className="text-sm font-medium text-gray-700">বেতন (মাসিক) *</label>
                 <input
                   required
                   type="number"
@@ -402,7 +413,7 @@ export default function EmployeesPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Joining Date *</label>
+                <label className="text-sm font-medium text-gray-700">যোগদানের তারিখ *</label>
                 <input
                   required
                   type="date"
@@ -414,50 +425,50 @@ export default function EmployeesPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">NID Number</label>
+                <label className="text-sm font-medium text-gray-700">জাতীয় পরিচয়পত্র নম্বর</label>
                 <input
                   name="nid"
                   value={formData.nid}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
-                  placeholder="National ID"
+                  placeholder="জাতীয় পরিচয়পত্র নম্বর"
                 />
               </div>
 
               <div className="col-span-full space-y-2">
-                <label className="text-sm font-medium text-gray-700">Address</label>
+                <label className="text-sm font-medium text-gray-700">ঠিকানা</label>
                 <textarea
                   name="address"
                   value={formData.address}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
-                  placeholder="Present Address"
+                  placeholder="বর্তমান ঠিকানা"
                   rows={2}
                 />
               </div>
 
               <div className="col-span-full space-y-2">
-                <label className="text-sm font-medium text-gray-700">Emergency Contact</label>
+                <label className="text-sm font-medium text-gray-700">জরুরি যোগাযোগ</label>
                 <input
                   name="emergencyContact"
                   value={formData.emergencyContact}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
-                  placeholder="Name & Phone"
+                  placeholder="নাম ও ফোন"
                 />
               </div>
               
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Status</label>
+                <label className="text-sm font-medium text-gray-700">স্ট্যাটাস</label>
                 <select
                   name="status"
                   value={formData.status}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white"
                 >
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                  <option value="terminated">Terminated</option>
+                  <option value="active">সক্রিয়</option>
+                  <option value="inactive">নিষ্ক্রিয়</option>
+                  <option value="terminated">বরখাস্ত</option>
                 </select>
               </div>
             </div>
@@ -468,7 +479,7 @@ export default function EmployeesPage() {
                 onClick={() => { setIsAddOpen(false); setIsEditOpen(false); }}
                 className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
               >
-                Cancel
+                বাতিল
               </button>
               <button
                 type="submit"
@@ -476,7 +487,7 @@ export default function EmployeesPage() {
                 className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
               >
                 {loading && <Loader2 className="animate-spin mr-2" size={18} />}
-                {isEditOpen ? "Update Employee" : "Create Employee"}
+                {isEditOpen ? "কর্মচারী আপডেট করুন" : "কর্মচারী তৈরি করুন"}
               </button>
             </DialogFooter>
           </form>
@@ -489,27 +500,28 @@ export default function EmployeesPage() {
           <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Trash2 className="text-red-600" size={24} />
           </div>
-          <DialogTitle className="text-xl font-bold mb-2">Delete Employee?</DialogTitle>
+          <DialogTitle className="text-xl font-bold mb-2">কর্মচারী মুছে ফেলবেন?</DialogTitle>
           <p className="text-gray-500 mb-6">
-            Are you sure you want to delete <strong>{currentEmployee?.name}</strong>? This action cannot be undone.
+            আপনি কি নিশ্চিত যে আপনি <strong>{currentEmployee?.name}</strong> মুছে ফেলতে চান? এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।
           </p>
           <div className="flex gap-2 justify-center">
             <button
               onClick={() => setIsDeleteOpen(false)}
               className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
             >
-              Cancel
+              বাতিল
             </button>
             <button
               onClick={handleDeleteEmployee}
               disabled={loading}
               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
             >
-              {loading ? "Deleting..." : "Delete"}
+              {loading ? "মুছে ফেলা হচ্ছে..." : "মুছে ফেলুন"}
             </button>
           </div>
         </DialogContent>
       </Dialog>
+
     </div>
   );
 }

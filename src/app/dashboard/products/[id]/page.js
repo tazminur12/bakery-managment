@@ -119,6 +119,12 @@ export default function ProductDetailsPage({ params }) {
                     ৳{(product.price - (product.costPrice || 0)).toFixed(2)}
                   </p>
                 </div>
+                <div className="col-span-2">
+                  <p className="text-gray-500">বর্তমান স্টক</p>
+                  <p className={`text-lg font-bold ${product.stock !== undefined && product.stock !== null ? (product.stock < 50 ? 'text-red-600' : 'text-green-600') : 'text-gray-400'}`}>
+                    {product.stock !== undefined && product.stock !== null ? `${product.stock} ${product.unit}` : 'স্টক নেই'}
+                  </p>
+                </div>
               </div>
             </div>
 

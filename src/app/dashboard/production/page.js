@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { 
   Factory, Plus, Calendar, Package, CheckCircle, Clock, 
-  Search, Filter, Loader2, Camera, Image as ImageIcon, ChevronsUpDown, Check, X 
+  Search, Filter, Loader2, Camera, Image as ImageIcon, ChevronsUpDown, Check, X,
+  Edit, Trash2, Eye
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
@@ -14,8 +15,15 @@ export default function ProductionPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   
+  // Store product stock mapping
+  const [productStockMap, setProductStockMap] = useState({});
+  
   // Modal State
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [currentProduction, setCurrentProduction] = useState(null);
   const [openCombobox, setOpenCombobox] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -47,6 +55,15 @@ export default function ProductionPage() {
       if (response.ok) {
         const data = await response.json();
         setProducts(data.products || []);
+        
+        // Create stock map for quick lookup
+        const stockMap = {};
+        (data.products || []).forEach(product => {
+          if (product.stock !== undefined && product.stock !== null) {
+            stockMap[product.name] = product.stock;
+          }
+        });
+        setProductStockMap(stockMap);
       }
     } catch (err) {
       console.error("Failed to fetch products:", err);
@@ -60,6 +77,8 @@ export default function ProductionPage() {
         const data = await response.json();
         setProductionLogs(data.productionLogs || []);
       }
+      // Refresh products to get updated stock
+      await fetchProducts();
     } catch (err) {
       console.error("Failed to fetch production logs:", err);
     } finally {
@@ -104,31 +123,95 @@ export default function ProductionPage() {
         imageUrl = await uploadImage();
       }
 
-      const response = await fetch("/api/production", {
-        method: "POST",
+      const url = isEditOpen ? `/api/production?id=${currentProduction._id}` : "/api/production";
+      const method = isEditOpen ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          ...(isEditOpen && { id: currentProduction._id }),
           ...formData,
-          image: imageUrl
+          image: imageUrl !== null ? imageUrl : (isEditOpen ? currentProduction.image : null)
         }),
       });
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || "Failed to log production");
+        throw new Error(data.error || (isEditOpen ? "Failed to update production" : "Failed to log production"));
       }
 
       await fetchProductionLogs();
+      await fetchProducts(); // Refresh products to get updated stock
       setIsAddOpen(false);
+      setIsEditOpen(false);
       setFormData(initialFormState);
       setImageFile(null);
       setImagePreview(null);
+      setCurrentProduction(null);
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
       setIsUploading(false);
     }
+  };
+
+  const handleEditClick = (production) => {
+    setCurrentProduction(production);
+    setFormData({
+      productName: production.productName,
+      quantity: production.quantity,
+      unit: production.unit,
+      status: production.status,
+      date: new Date(production.date).toISOString().split("T")[0],
+      notes: production.notes || ""
+    });
+    setImagePreview(production.image || null);
+    setIsEditOpen(true);
+  };
+
+  const handleDeleteProduction = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/production?id=${currentProduction._id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete production");
+      }
+
+      await fetchProductionLogs();
+      await fetchProducts(); // Refresh products to get updated stock
+      setIsDeleteOpen(false);
+      setCurrentProduction(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleViewDetails = async (id) => {
+    try {
+      const response = await fetch(`/api/production?id=${id}`);
+      if (response.ok) {
+        const data = await response.json();
+        setCurrentProduction(data.productionLog);
+        setIsDetailsOpen(true);
+      }
+    } catch (err) {
+      console.error("Failed to fetch production details:", err);
+    }
+  };
+
+  const resetForm = () => {
+    setFormData(initialFormState);
+    setImageFile(null);
+    setImagePreview(null);
+    setCurrentProduction(null);
+    setError("");
   };
 
   // Filter logs based on search
@@ -150,7 +233,10 @@ export default function ProductionPage() {
           <p className="text-gray-500">প্রতিদিনের উৎপাদনের হিসাব এবং ট্র্যাকিং</p>
         </div>
         <button
-          onClick={() => setIsAddOpen(true)}
+          onClick={() => {
+            resetForm();
+            setIsAddOpen(true);
+          }}
           className="flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
         >
           <Plus size={20} className="mr-2" />
@@ -215,40 +301,53 @@ export default function ProductionPage() {
                 <th className="px-6 py-4">তারিখ</th>
                 <th className="px-6 py-4">পণ্যের নাম</th>
                 <th className="px-6 py-4">পরিমাণ</th>
+                <th className="px-6 py-4">বর্তমান স্টক</th>
                 <th className="px-6 py-4">ছবি</th>
                 <th className="px-6 py-4">স্ট্যাটাস</th>
                 <th className="px-6 py-4">এন্ট্রি করেছেন</th>
+                <th className="px-6 py-4 text-right">কার্যক্রম</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {isLoading ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center">
+                  <td colSpan="8" className="px-6 py-12 text-center">
                     <Loader2 className="animate-spin mx-auto text-indigo-600" size={32} />
                   </td>
                 </tr>
               ) : filteredLogs.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan="8" className="px-6 py-12 text-center text-gray-500">
                     কোনো উৎপাদনের তথ্য পাওয়া যায়নি
                   </td>
                 </tr>
               ) : (
-                filteredLogs.map((log) => (
-                  <tr key={log._id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {new Date(log.date).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 font-medium text-gray-900">
-                      {log.productName}
-                      {log.notes && (
-                        <p className="text-xs text-gray-500 mt-0.5">{log.notes}</p>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-sm font-medium">
-                      {log.quantity} <span className="text-gray-500 font-normal">{log.unit}</span>
-                    </td>
-                    <td className="px-6 py-4">
+                filteredLogs.map((log) => {
+                  const currentStock = productStockMap[log.productName];
+                  return (
+                    <tr key={log._id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 text-sm text-gray-600">
+                        {new Date(log.date).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 font-medium text-gray-900">
+                        {log.productName}
+                        {log.notes && (
+                          <p className="text-xs text-gray-500 mt-0.5">{log.notes}</p>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-sm font-medium">
+                        {log.quantity} <span className="text-gray-500 font-normal">{log.unit}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        {currentStock !== undefined && currentStock !== null ? (
+                          <span className={`text-sm font-medium ${currentStock < 50 ? 'text-red-600' : 'text-green-600'}`}>
+                            {currentStock} {log.unit}
+                          </span>
+                        ) : (
+                          <span className="text-sm text-gray-400">-</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
                       {log.image ? (
                         <div className="h-10 w-10 rounded-lg overflow-hidden border border-gray-200">
                           <img src={log.image} alt={log.productName} className="h-full w-full object-cover" />
@@ -271,19 +370,54 @@ export default function ProductionPage() {
                     <td className="px-6 py-4 text-sm text-gray-500">
                       {log.createdBy?.name || "Unknown"}
                     </td>
-                  </tr>
-                ))
+                    <td className="px-6 py-4">
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => handleViewDetails(log._id)}
+                          className="text-blue-600 hover:text-blue-800 p-1.5 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="বিস্তারিত দেখুন"
+                        >
+                          <Eye size={18} />
+                        </button>
+                        <button
+                          onClick={() => handleEditClick(log)}
+                          className="text-indigo-600 hover:text-indigo-800 p-1.5 hover:bg-indigo-50 rounded-lg transition-colors"
+                          title="এডিট করুন"
+                        >
+                          <Edit size={18} />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setCurrentProduction(log);
+                            setIsDeleteOpen(true);
+                          }}
+                          className="text-red-600 hover:text-red-800 p-1.5 hover:bg-red-50 rounded-lg transition-colors"
+                          title="মুছে ফেলুন"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Add Production Modal */}
-      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+      {/* Add/Edit Production Modal */}
+      <Dialog open={isAddOpen || isEditOpen} onOpenChange={(open) => {
+        if (!open) {
+          setIsAddOpen(false);
+          setIsEditOpen(false);
+          resetForm();
+        }
+      }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>নতুন উৎপাদন এন্ট্রি</DialogTitle>
+            <DialogTitle>{isEditOpen ? "উৎপাদন এন্ট্রি এডিট করুন" : "নতুন উৎপাদন এন্ট্রি"}</DialogTitle>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-4 py-4">
@@ -450,7 +584,11 @@ export default function ProductionPage() {
             <DialogFooter>
               <button
                 type="button"
-                onClick={() => setIsAddOpen(false)}
+                onClick={() => {
+                  setIsAddOpen(false);
+                  setIsEditOpen(false);
+                  resetForm();
+                }}
                 className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
               >
                 বাতিল
@@ -463,12 +601,112 @@ export default function ProductionPage() {
                 {loading ? (
                   <div className="flex items-center">
                     <Loader2 className="animate-spin mr-2" size={18} />
-                    {isUploading ? "আপলোড হচ্ছে..." : "সেভ হচ্ছে..."}
+                    {isUploading ? "আপলোড হচ্ছে..." : isEditOpen ? "আপডেট হচ্ছে..." : "সেভ হচ্ছে..."}
                   </div>
-                ) : "সেভ করুন"}
+                ) : (isEditOpen ? "আপডেট করুন" : "সেভ করুন")}
               </button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <DialogContent className="sm:max-w-sm text-center p-6">
+          <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Trash2 className="text-red-600" size={24} />
+          </div>
+          <DialogTitle className="text-xl font-bold mb-2">উৎপাদন এন্ট্রি মুছে ফেলবেন?</DialogTitle>
+          <p className="text-gray-500 mb-6">
+            আপনি কি নিশ্চিত যে আপনি <strong>{currentProduction?.productName}</strong> এর উৎপাদন এন্ট্রি মুছে ফেলতে চান? এটি আর ফিরিয়ে আনা যাবে না।
+          </p>
+          <div className="flex gap-2 justify-center">
+            <button
+              onClick={() => setIsDeleteOpen(false)}
+              className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+            >
+              বাতিল
+            </button>
+            <button
+              onClick={handleDeleteProduction}
+              disabled={loading}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+            >
+              {loading ? "মুছে ফেলা হচ্ছে..." : "মুছে ফেলুন"}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Details Modal */}
+      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>উৎপাদন বিবরণ</DialogTitle>
+          </DialogHeader>
+          {currentProduction && (
+            <div className="space-y-4 py-4">
+              {currentProduction.image && (
+                <div className="w-full h-48 rounded-lg overflow-hidden border border-gray-200">
+                  <img 
+                    src={currentProduction.image} 
+                    alt={currentProduction.productName} 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-500">পণ্যের নাম</p>
+                  <p className="font-medium text-gray-900">{currentProduction.productName}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">পরিমাণ</p>
+                  <p className="font-medium text-gray-900">
+                    {currentProduction.quantity} {currentProduction.unit}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">তারিখ</p>
+                  <p className="font-medium text-gray-900">
+                    {new Date(currentProduction.date).toLocaleDateString('en-GB')}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">স্ট্যাটাস</p>
+                  <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-medium ${
+                    currentProduction.status === "Completed" 
+                      ? "bg-green-100 text-green-700" 
+                      : "bg-amber-100 text-amber-700"
+                  }`}>
+                    {currentProduction.status === "Completed" ? "সম্পন্ন" : "চলমান"}
+                  </span>
+                </div>
+                {currentProduction.createdBy && (
+                  <div>
+                    <p className="text-sm text-gray-500">এন্ট্রি করেছেন</p>
+                    <p className="font-medium text-gray-900">{currentProduction.createdBy.name}</p>
+                  </div>
+                )}
+                {currentProduction.createdAt && (
+                  <div>
+                    <p className="text-sm text-gray-500">এন্ট্রি তারিখ</p>
+                    <p className="font-medium text-gray-900">
+                      {new Date(currentProduction.createdAt).toLocaleDateString('en-GB')}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {currentProduction.notes && (
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">নোট</p>
+                  <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">{currentProduction.notes}</p>
+                </div>
+              )}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

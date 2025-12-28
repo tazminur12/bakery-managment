@@ -29,8 +29,8 @@ const NAV_ITEMS = [
   { label: "বিক্রয়", href: "/dashboard/sales", icon: ShoppingCart },
   { label: "খরচ", href: "/dashboard/expense", icon: Wallet },
   { label: "কাস্টমার", href: "/dashboard/customers", icon: Users },
-  { label: "লেজার", href: "/ledger", icon: BookOpen },
-  { label: "রিপোর্ট", href: "/reports", icon: BarChart3 },
+  { label: "লেজার", href: "/dashboard/ledger", icon: BookOpen },
+  { label: "রিপোর্ট", href: "/dashboard/reports", icon: BarChart3 },
   { label: "কর্মচারী", href: "/dashboard/employees", icon: Users },
   {
     label: "সেটিংস",
@@ -77,7 +77,7 @@ export default function Sidebar({
         <div className="h-16 flex items-center justify-between px-4 border-b border-gray-100">
           {isSidebarOpen ? (
             <span className="font-bold text-xl text-indigo-600 truncate">
-              বেকারি সিস্টেম
+             হামজা বেকারি সিস্টেম
             </span>
           ) : (
             <span className="font-bold text-xl text-indigo-600 mx-auto">
@@ -175,24 +175,6 @@ export default function Sidebar({
             })}
           </nav>
         </div>
-
-        {/* Bottom Section: Total Due */}
-        <div className="p-4 border-t border-gray-100 bg-gray-50/50">
-          {isSidebarOpen ? (
-            <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
-              <p className="text-xs text-gray-500 font-medium uppercase mb-1">
-                আজকের মোট বাকি
-              </p>
-              <p className="text-lg font-bold text-red-500">৳ ৫,৪৩০</p>
-            </div>
-          ) : (
-            <div className="flex justify-center" title="আজকের মোট বাকি: ৳ ৫,৪৩০">
-              <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-bold text-xs">
-                ৳
-              </div>
-            </div>
-          )}
-        </div>
       </aside>
 
       {/* Mobile Bottom Drawer Overlay */}
@@ -247,15 +229,6 @@ export default function Sidebar({
               </Link>
             );
           })}
-        </div>
-
-        <div className="p-4 border-t border-gray-100 bg-gray-50">
-          <div className="flex justify-between items-center bg-white p-3 rounded-lg border border-gray-200">
-            <span className="text-sm text-gray-500 font-medium">
-              আজকের মোট বাকি
-            </span>
-            <span className="text-base font-bold text-red-500">৳ ৫,৪৩০</span>
-          </div>
         </div>
       </div>
     </>

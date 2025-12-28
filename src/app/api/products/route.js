@@ -34,7 +34,57 @@ export async function GET(request) {
       .sort({ createdAt: -1 })
       .toArray();
 
-    return NextResponse.json({ products });
+    // Recalculate stock for each product from production and sales
+    const productsWithStock = await Promise.all(
+      products.map(async (product) => {
+        // Calculate total production for this product
+        const productionEntries = await db.collection("production")
+          .find({ productName: product.name })
+          .toArray();
+        
+        const totalProduction = productionEntries.reduce((sum, entry) => sum + (entry.quantity || 0), 0);
+        
+        // Calculate total sales for this product
+        const salesEntries = await db.collection("sales")
+          .find({})
+          .toArray();
+        
+        let totalSold = 0;
+        const productIdStr = product._id.toString();
+        salesEntries.forEach(sale => {
+          sale.items?.forEach(item => {
+            // Match by productId, _id, or name
+            const itemProductId = item.productId?.toString() || item._id?.toString();
+            if (itemProductId === productIdStr || item.name === product.name) {
+              totalSold += item.quantity || 0;
+            }
+          });
+        });
+        
+        // Calculate actual stock
+        const calculatedStock = totalProduction - totalSold;
+        
+        // Update product stock if it's different (to keep it in sync)
+        if (product.stock !== calculatedStock) {
+          await db.collection("products").updateOne(
+            { _id: product._id },
+            { 
+              $set: { 
+                stock: calculatedStock,
+                updatedAt: new Date()
+              } 
+            }
+          );
+        }
+        
+        return {
+          ...product,
+          stock: calculatedStock
+        };
+      })
+    );
+
+    return NextResponse.json({ products: productsWithStock });
   } catch (error) {
     console.error("Fetch products error:", error);
     return NextResponse.json(

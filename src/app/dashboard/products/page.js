@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { 
   Package, Plus, Search, Edit, Trash2, Camera, Loader2, 
   Image as ImageIcon, Filter, Eye 
@@ -8,6 +9,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 export default function ProductsPage() {
+  const router = useRouter();
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -269,27 +271,38 @@ export default function ProductsPage() {
                     <p className="font-bold text-indigo-600">৳ {product.price}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-gray-500">ইউনিট</p>
-                    <p className="font-medium text-gray-700 uppercase">{product.unit}</p>
+                    <p className="text-xs text-gray-500">বর্তমান স্টক</p>
+                    <p className={`font-medium ${product.stock !== undefined && product.stock !== null ? (product.stock < 50 ? 'text-red-600' : 'text-green-600') : 'text-gray-400'}`}>
+                      {product.stock !== undefined && product.stock !== null ? `${product.stock} ${product.unit}` : 'স্টক নেই'}
+                    </p>
                   </div>
                 </div>
               </div>
 
               <div className="bg-gray-50 px-4 py-3 border-t border-gray-100 flex justify-between items-center">
                 <button 
-                  onClick={() => handleEditClick(product)}
-                  className="text-indigo-600 hover:text-indigo-800 p-1.5 hover:bg-indigo-50 rounded-lg transition-colors"
-                  title="Edit"
+                  onClick={() => router.push(`/dashboard/products/${product._id}`)}
+                  className="text-blue-600 hover:text-blue-800 p-1.5 hover:bg-blue-50 rounded-lg transition-colors"
+                  title="বিস্তারিত দেখুন"
                 >
-                  <Edit size={18} />
+                  <Eye size={18} />
                 </button>
-                <button 
-                  onClick={() => { setCurrentProduct(product); setIsDeleteOpen(true); }}
-                  className="text-red-600 hover:text-red-800 p-1.5 hover:bg-red-50 rounded-lg transition-colors"
-                  title="Delete"
-                >
-                  <Trash2 size={18} />
-                </button>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => handleEditClick(product)}
+                    className="text-indigo-600 hover:text-indigo-800 p-1.5 hover:bg-indigo-50 rounded-lg transition-colors"
+                    title="Edit"
+                  >
+                    <Edit size={18} />
+                  </button>
+                  <button 
+                    onClick={() => { setCurrentProduct(product); setIsDeleteOpen(true); }}
+                    className="text-red-600 hover:text-red-800 p-1.5 hover:bg-red-50 rounded-lg transition-colors"
+                    title="Delete"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
               </div>
             </div>
           ))
