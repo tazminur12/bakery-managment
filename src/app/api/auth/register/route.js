@@ -2,10 +2,12 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import clientPromise from "@/lib/mongodb";
 
+import { ROLES_LIST } from "@/lib/constants";
+
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { name, email, password } = body;
+    const { name, email, password, role, image } = body;
 
     // Validation
     if (!name || !email || !password) {
@@ -18,6 +20,16 @@ export async function POST(request) {
     if (password.length < 6) {
       return NextResponse.json(
         { error: "Password কমপক্ষে 6 characters হতে হবে" },
+        { status: 400 }
+      );
+    }
+
+    // Default role if not provided
+    const userRole = role || "Viewer / Auditor";
+
+    if (!ROLES_LIST.includes(userRole)) {
+      return NextResponse.json(
+        { error: "Invalid role selected" },
         { status: 400 }
       );
     }
@@ -46,6 +58,9 @@ export async function POST(request) {
       name,
       email: email.toLowerCase(),
       password: hashedPassword,
+      role: userRole,
+      status: "active",
+      image: image || null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -65,4 +80,3 @@ export async function POST(request) {
     );
   }
 }
-

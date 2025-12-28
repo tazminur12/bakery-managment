@@ -98,7 +98,7 @@ export default function Topbar({ toggleMobileMenu }) {
 
               <div className="py-1">
                 <Link
-                  href="/profile"
+                  href="/dashboard/profile"
                   className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-indigo-600 transition-colors"
                   onClick={() => setIsDropdownOpen(false)}
                 >
@@ -106,7 +106,7 @@ export default function Topbar({ toggleMobileMenu }) {
                   Profile
                 </Link>
                 <Link
-                  href="/settings"
+                  href="/dashboard/settings/general"
                   className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-indigo-600 transition-colors"
                   onClick={() => setIsDropdownOpen(false)}
                 >

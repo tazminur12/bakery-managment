@@ -45,6 +45,8 @@ export const authOptions = {
             id: user._id.toString(),
             email: user.email,
             name: user.name || user.email,
+            role: user.role || "Viewer / Auditor", // Include role
+            image: user.image, // Include image
           };
         } catch (error) {
           console.error("Authentication error:", error);
@@ -57,15 +59,23 @@ export const authOptions = {
     signIn: "/login",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
+        token.role = user.role; // Add role to token
+        token.image = user.image; // Add image to token
+      }
+      if (trigger === "update" && session?.user) {
+        token.image = session.user.image;
+        token.name = session.user.name;
       }
       return token;
     },
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id;
+        session.user.role = token.role; // Add role to session
+        session.user.image = token.image; // Add image to session
       }
       return session;
     },
@@ -79,4 +89,3 @@ export const authOptions = {
 const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
-

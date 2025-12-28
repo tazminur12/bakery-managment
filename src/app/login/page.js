@@ -173,18 +173,6 @@ function LoginForm() {
                 {loading ? "Login হচ্ছে..." : "Login করুন"}
               </button>
             </form>
-
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
-                অ্যাকাউন্ট নেই?{" "}
-                <Link
-                  href="/register"
-                  className="font-medium text-gray-900 hover:text-gray-700"
-                >
-                  নতুন অ্যাকাউন্ট তৈরি করুন
-                </Link>
-              </p>
-            </div>
           </div>
         </div>
       </div>

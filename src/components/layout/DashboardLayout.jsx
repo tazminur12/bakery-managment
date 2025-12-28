@@ -13,7 +13,7 @@ export default function DashboardLayout({ children }) {
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex font-sans text-gray-900">
+    <div className="min-h-screen bg-gray-50 flex font-kalpurush text-gray-900">
       <Sidebar
         isSidebarOpen={isSidebarOpen}
         toggleSidebar={toggleSidebar}
