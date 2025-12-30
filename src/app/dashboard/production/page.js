@@ -215,9 +215,11 @@ export default function ProductionPage() {
   };
 
   // Filter logs based on search
-  const filteredLogs = productionLogs.filter(log => 
-    log.productName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredLogs = productionLogs.filter(log => {
+    const name = (log.productName || "").toLowerCase();
+    const query = (searchTerm || "").toLowerCase();
+    return name.includes(query);
+  });
 
   // Calculate stats
   const totalProductionToday = filteredLogs
@@ -245,34 +247,34 @@ export default function ProductionPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+        <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm flex items-center">
           <div className="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
             <Factory size={24} />
           </div>
           <div>
             <p className="text-sm text-gray-500">আজকের এন্ট্রি</p>
-            <h3 className="text-2xl font-bold text-gray-900">{totalProductionToday}</h3>
+            <h3 className="text-xl sm:text-2xl font-bold text-gray-900">{totalProductionToday}</h3>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center">
+        <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm flex items-center">
           <div className="p-3 rounded-full bg-green-100 text-green-600 mr-4">
             <CheckCircle size={24} />
           </div>
           <div>
             <p className="text-sm text-gray-500">মোট সম্পন্ন</p>
-            <h3 className="text-2xl font-bold text-gray-900">
+            <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
               {productionLogs.filter(l => l.status === "Completed").length}
             </h3>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center">
+        <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm flex items-center">
           <div className="p-3 rounded-full bg-amber-100 text-amber-600 mr-4">
             <Clock size={24} />
           </div>
           <div>
             <p className="text-sm text-gray-500">প্রক্রিয়াধীন</p>
-            <h3 className="text-2xl font-bold text-gray-900">
+            <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
               {productionLogs.filter(l => l.status === "In Progress").length}
             </h3>
           </div>
@@ -281,13 +283,13 @@ export default function ProductionPage() {
 
       {/* Search and List */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-gray-200 bg-gray-50 flex items-center gap-4">
-          <div className="relative flex-1 max-w-md">
+        <div className="p-4 border-b border-gray-200 bg-gray-50 flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
             <input
               type="text"
               placeholder="পণ্যের নাম দিয়ে খুঁজুন..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -298,26 +300,26 @@ export default function ProductionPage() {
           <table className="w-full text-left">
             <thead className="bg-gray-100 text-gray-600 text-xs uppercase font-semibold">
               <tr>
-                <th className="px-6 py-4">তারিখ</th>
-                <th className="px-6 py-4">পণ্যের নাম</th>
-                <th className="px-6 py-4">পরিমাণ</th>
-                <th className="px-6 py-4">বর্তমান স্টক</th>
-                <th className="px-6 py-4">ছবি</th>
-                <th className="px-6 py-4">স্ট্যাটাস</th>
-                <th className="px-6 py-4">এন্ট্রি করেছেন</th>
-                <th className="px-6 py-4 text-right">কার্যক্রম</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-4">তারিখ</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-4">পণ্যের নাম</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-4">পরিমাণ</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-4">বর্তমান স্টক</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-4">ছবি</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-4">স্ট্যাটাস</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-4">এন্ট্রি করেছেন</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-4 text-right">কার্যক্রম</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {isLoading ? (
                 <tr>
-                  <td colSpan="8" className="px-6 py-12 text-center">
+                  <td colSpan="8" className="px-4 sm:px-6 py-12 text-center">
                     <Loader2 className="animate-spin mx-auto text-indigo-600" size={32} />
                   </td>
                 </tr>
               ) : filteredLogs.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan="8" className="px-4 sm:px-6 py-12 text-center text-gray-500">
                     কোনো উৎপাদনের তথ্য পাওয়া যায়নি
                   </td>
                 </tr>
@@ -326,19 +328,19 @@ export default function ProductionPage() {
                   const currentStock = productStockMap[log.productName];
                   return (
                     <tr key={log._id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 text-sm text-gray-600">
+                      <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-600">
                         {new Date(log.date).toLocaleDateString()}
                       </td>
-                      <td className="px-6 py-4 font-medium text-gray-900">
+                      <td className="px-4 sm:px-6 py-3 sm:py-4 font-medium text-gray-900">
                         {log.productName}
                         {log.notes && (
                           <p className="text-xs text-gray-500 mt-0.5">{log.notes}</p>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-sm font-medium">
+                      <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm font-medium">
                         {log.quantity} <span className="text-gray-500 font-normal">{log.unit}</span>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 sm:px-6 py-3 sm:py-4">
                         {currentStock !== undefined && currentStock !== null ? (
                           <span className={`text-sm font-medium ${currentStock < 50 ? 'text-red-600' : 'text-green-600'}`}>
                             {currentStock} {log.unit}
@@ -347,7 +349,7 @@ export default function ProductionPage() {
                           <span className="text-sm text-gray-400">-</span>
                         )}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 sm:px-6 py-3 sm:py-4">
                       {log.image ? (
                         <div className="h-10 w-10 rounded-lg overflow-hidden border border-gray-200">
                           <img src={log.image} alt={log.productName} className="h-full w-full object-cover" />
@@ -358,7 +360,7 @@ export default function ProductionPage() {
                         </div>
                       )}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 sm:px-6 py-3 sm:py-4">
                       <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
                         log.status === "Completed" 
                           ? "bg-green-100 text-green-700" 
@@ -367,10 +369,10 @@ export default function ProductionPage() {
                         {log.status === "Completed" ? "সম্পন্ন" : "চলমান"}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-500">
                       {log.createdBy?.name || "Unknown"}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 sm:px-6 py-3 sm:py-4">
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => handleViewDetails(log._id)}
@@ -429,7 +431,7 @@ export default function ProductionPage() {
                 <input
                   type="text"
                   placeholder="পণ্য নির্বাচন করুন বা টাইপ করুন..."
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 pr-10"
+                  className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 pr-10"
                   value={formData.productName}
                   onChange={(e) => {
                     setFormData({ ...formData, productName: e.target.value });
@@ -460,13 +462,13 @@ export default function ProductionPage() {
                     onClick={() => setOpenCombobox(false)} 
                   />
                   <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                    {products.filter(p => p.name.toLowerCase().includes(formData.productName.toLowerCase())).length === 0 ? (
+                    {products.filter(p => (p.name || "").toLowerCase().includes((formData.productName || "").toLowerCase())).length === 0 ? (
                       <div className="p-3 text-sm text-gray-500 text-center">
                         কোন পণ্য পাওয়া যায়নি
                       </div>
                     ) : (
                       products
-                        .filter(p => p.name.toLowerCase().includes(formData.productName.toLowerCase()))
+                        .filter(p => (p.name || "").toLowerCase().includes((formData.productName || "").toLowerCase()))
                         .map((product) => (
                           <div
                             key={product._id}
@@ -493,7 +495,7 @@ export default function ProductionPage() {
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">পরিমাণ *</label>
                 <input
@@ -502,7 +504,7 @@ export default function ProductionPage() {
                   name="quantity"
                   value={formData.quantity}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500"
                   placeholder="0"
                 />
               </div>

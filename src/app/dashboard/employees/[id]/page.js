@@ -209,7 +209,7 @@ export default function EmployeeDetailsPage({ params }) {
 
   if (error || !employee) {
     return (
-      <div className="text-center py-12">
+      <div className="text-center py-8 sm:py-12">
         <p className="text-red-500 mb-4">{error || "Employee not found"}</p>
         <button
           onClick={() => router.back()}
@@ -238,11 +238,11 @@ export default function EmployeeDetailsPage({ params }) {
       </div>
 
       {/* Info & Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         {/* Employee Info Card */}
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm md:col-span-1 h-fit">
+        <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm md:col-span-1 h-fit">
           <div className="flex items-center gap-4 mb-6">
-            <div className="h-16 w-16 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 overflow-hidden">
+            <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 overflow-hidden">
               {employee.image ? (
                 <img src={employee.image} alt={employee.name} className="h-full w-full object-cover" />
               ) : (
@@ -250,7 +250,7 @@ export default function EmployeeDetailsPage({ params }) {
               )}
             </div>
             <div>
-              <h2 className="font-bold text-lg text-gray-900">{employee.name}</h2>
+              <h2 className="font-bold text-base sm:text-lg text-gray-900 truncate">{employee.name}</h2>
               <span className="text-xs font-mono text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
                 {employee.employeeId}
               </span>
@@ -299,7 +299,7 @@ export default function EmployeeDetailsPage({ params }) {
 
         {/* Stats Cards */}
         <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+          <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm">
             <div className="flex items-center justify-between mb-2">
               <div className="p-2 rounded-lg bg-blue-50 text-blue-600">
                 <CreditCard size={20} />
@@ -311,7 +311,7 @@ export default function EmployeeDetailsPage({ params }) {
             </h3>
           </div>
 
-          <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+          <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm">
             <div className="flex items-center justify-between mb-2">
               <div className="p-2 rounded-lg bg-green-50 text-green-600">
                 <DollarSign size={20} />
@@ -323,7 +323,7 @@ export default function EmployeeDetailsPage({ params }) {
             </h3>
           </div>
 
-          <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+          <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm">
             <div className="flex items-center justify-between mb-2">
               <div className={`p-2 rounded-lg ${
                 balanceInfo.balance > 0 ? "bg-orange-50 text-orange-600" : "bg-green-50 text-green-600"
@@ -353,7 +353,7 @@ export default function EmployeeDetailsPage({ params }) {
 
       {/* Salary Payment History */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+        <div className="p-4 border-b border-gray-200 bg-gray-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <h3 className="font-bold text-gray-900 flex items-center gap-2">
             <Calendar size={18} className="text-gray-500" />
             বেতন পরিশোধের ইতিহাস
@@ -708,4 +708,3 @@ export default function EmployeeDetailsPage({ params }) {
     </div>
   );
 }
-

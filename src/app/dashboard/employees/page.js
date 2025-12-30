@@ -234,13 +234,13 @@ export default function EmployeesPage() {
       </div>
 
       {/* Search */}
-      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+      <div className="bg-white p-3 sm:p-4 rounded-xl border border-gray-200 shadow-sm">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
           <input
             type="text"
             placeholder="নাম, আইডি (BK-2025-XXXX), বা ফোন দিয়ে অনুসন্ধান করুন..."
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -248,23 +248,23 @@ export default function EmployeesPage() {
       </div>
 
       {/* Employee Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {isLoading ? (
-          <div className="col-span-full flex justify-center py-12">
+          <div className="col-span-full flex justify-center py-8 sm:py-12">
             <Loader2 className="animate-spin text-indigo-600" size={32} />
           </div>
         ) : filteredEmployees.length === 0 ? (
-          <div className="col-span-full text-center py-12 text-gray-500 bg-white rounded-xl border border-dashed border-gray-300">
+          <div className="col-span-full text-center py-8 sm:py-12 text-gray-500 bg-white rounded-xl border border-dashed border-gray-300">
             <Users size={48} className="mx-auto mb-4 text-gray-300" />
             <p>কোনো কর্মচারী পাওয়া যায়নি</p>
           </div>
         ) : (
           filteredEmployees.map((employee) => (
             <div key={employee._id} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
+              <div className="p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-0 mb-4">
                   <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 rounded-full bg-gray-100 flex-shrink-0 overflow-hidden border border-gray-200">
+                    <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-gray-100 flex-shrink-0 overflow-hidden border border-gray-200">
                       {employee.image ? (
                         <img src={employee.image} alt={employee.name} className="h-full w-full object-cover" />
                       ) : (
@@ -274,14 +274,14 @@ export default function EmployeesPage() {
                       )}
                     </div>
                     <div>
-                      <h3 className="font-bold text-gray-900">{employee.name}</h3>
+                      <h3 className="font-bold text-gray-900 text-base sm:text-lg truncate max-w-[160px] sm:max-w-none">{employee.name}</h3>
                       <p className="text-xs font-mono text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full inline-block mt-1">
                         {employee.employeeId}
                       </p>
-                      <p className="text-sm text-gray-500 mt-1">{employee.role}</p>
+                      <p className="text-sm text-gray-500 mt-1 truncate max-w-[200px] sm:max-w-none">{employee.role}</p>
                     </div>
                   </div>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium mt-2 sm:mt-0 self-start sm:self-auto ${
                     employee.status === 'active' ? 'bg-green-100 text-green-700' : employee.status === 'inactive' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
                   }`}>
                     {employee.status === 'active' ? 'সক্রিয়' : employee.status === 'inactive' ? 'নিষ্ক্রিয়' : 'বরখাস্ত'}
@@ -312,10 +312,10 @@ export default function EmployeesPage() {
                 </div>
               </div>
 
-              <div className="bg-gray-50 px-6 py-3 border-t border-gray-100 flex justify-between items-center">
+              <div className="bg-gray-50 px-4 sm:px-6 py-3 border-t border-gray-100 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
                 <Link
                   href={`/dashboard/employees/${employee._id}`}
-                  className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1 px-3 py-1.5 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                  className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1 px-3 py-2 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
                   title="বিস্তারিত দেখুন"
                 >
                   <Eye size={16} /> বিস্তারিত

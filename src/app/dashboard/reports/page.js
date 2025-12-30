@@ -129,19 +129,19 @@ export default function ReportsPage() {
           </h1>
           <p className="text-gray-500">বিক্রয়, খরচ এবং লাভের বিস্তারিত রিপোর্ট</p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2">
             <Calendar size={18} className="text-gray-400" />
             <input
               type="date"
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+              className="px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
               value={dateRange.start}
               onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
             />
             <span className="text-gray-500">থেকে</span>
             <input
               type="date"
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+              className="px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
               value={dateRange.end}
               onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
             />
@@ -160,54 +160,54 @@ export default function ReportsPage() {
       ) : (
         <>
           {/* Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <div className="p-3 rounded-full bg-green-100 text-green-600">
                   <ShoppingCart size={24} />
                 </div>
               </div>
               <p className="text-sm text-gray-500">মোট বিক্রয়</p>
-              <h3 className="text-2xl font-bold text-gray-900 mt-1">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mt-1">
                 ৳ {summary.totalSales.toLocaleString('en-BD', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </h3>
               <p className="text-xs text-gray-400 mt-2">{summary.totalOrders} টি অর্ডার</p>
             </div>
 
-            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+            <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <div className="p-3 rounded-full bg-red-100 text-red-600">
                   <Wallet size={24} />
                 </div>
               </div>
               <p className="text-sm text-gray-500">মোট খরচ</p>
-              <h3 className="text-2xl font-bold text-gray-900 mt-1">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mt-1">
                 ৳ {summary.totalExpenses.toLocaleString('en-BD', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </h3>
               <p className="text-xs text-gray-400 mt-2">{expenses.length} টি খরচ</p>
             </div>
 
-            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+            <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <div className={`p-3 rounded-full ${summary.profit >= 0 ? 'bg-indigo-100 text-indigo-600' : 'bg-red-100 text-red-600'}`}>
                   {summary.profit >= 0 ? <TrendingUp size={24} /> : <TrendingDown size={24} />}
                 </div>
               </div>
               <p className="text-sm text-gray-500">নিট লাভ/ক্ষতি</p>
-              <h3 className={`text-2xl font-bold mt-1 ${summary.profit >= 0 ? 'text-indigo-600' : 'text-red-600'}`}>
+              <h3 className={`text-xl sm:text-2xl font-bold mt-1 ${summary.profit >= 0 ? 'text-indigo-600' : 'text-red-600'}`}>
                 ৳ {summary.profit.toLocaleString('en-BD', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </h3>
               <p className="text-xs text-gray-400 mt-2">{summary.profitMargin}% মার্জিন</p>
             </div>
 
-            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+            <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <div className="p-3 rounded-full bg-blue-100 text-blue-600">
                   <DollarSign size={24} />
                 </div>
               </div>
               <p className="text-sm text-gray-500">গড় অর্ডার মূল্য</p>
-              <h3 className="text-2xl font-bold text-gray-900 mt-1">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mt-1">
                 ৳ {summary.avgOrderValue}
               </h3>
               <p className="text-xs text-gray-400 mt-2">প্রতি অর্ডার</p>
@@ -215,9 +215,9 @@ export default function ReportsPage() {
           </div>
 
           {/* Charts Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Daily Sales Trend */}
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-6">
               <h3 className="font-bold text-gray-900 mb-6 flex items-center gap-2">
                 <TrendingUp size={20} className="text-indigo-600" />
                 দৈনিক বিক্রয় ট্রেন্ড
@@ -227,19 +227,19 @@ export default function ReportsPage() {
                   <p className="text-gray-500 text-center py-8">কোনো ডেটা নেই</p>
                 ) : (
                   dailyTrend.map((day, index) => (
-                    <div key={index} className="flex items-center gap-4">
-                      <div className="w-20 text-sm text-gray-600">{day.date}</div>
-                      <div className="flex-1 bg-gray-100 rounded-full h-6 relative overflow-hidden">
+                    <div key={index} className="flex items-center gap-3 sm:gap-4">
+                      <div className="w-16 sm:w-20 text-xs sm:text-sm text-gray-600">{day.date}</div>
+                      <div className="flex-1 bg-gray-100 rounded-full h-5 sm:h-6 relative overflow-hidden">
                         <div
-                          className="bg-indigo-600 h-6 rounded-full flex items-center justify-end pr-2"
+                          className="bg-indigo-600 h-5 sm:h-6 rounded-full flex items-center justify-end pr-2"
                           style={{ width: `${maxDailyAmount > 0 ? (day.amount / maxDailyAmount) * 100 : 0}%` }}
                         >
-                          <span className="text-xs font-medium text-white">
+                          <span className="text-[10px] sm:text-xs font-medium text-white">
                             {day.amount.toFixed(0)}
                           </span>
                         </div>
                       </div>
-                      <div className="w-24 text-sm font-medium text-gray-900 text-right">
+                      <div className="w-20 sm:w-24 text-xs sm:text-sm font-medium text-gray-900 text-right">
                         ৳ {day.amount.toFixed(2)}
                       </div>
                     </div>
@@ -249,7 +249,7 @@ export default function ReportsPage() {
             </div>
 
             {/* Sales by Payment Method */}
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-6">
               <h3 className="font-bold text-gray-900 mb-6 flex items-center gap-2">
                 <PieChart size={20} className="text-indigo-600" />
                 পেমেন্ট মেথড অনুযায়ী বিক্রয়
@@ -285,7 +285,7 @@ export default function ReportsPage() {
           </div>
 
           {/* Expenses by Category */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-6">
             <h3 className="font-bold text-gray-900 mb-6 flex items-center gap-2">
               <FileText size={20} className="text-indigo-600" />
               ক্যাটাগরি অনুযায়ী খরচ
@@ -294,16 +294,16 @@ export default function ReportsPage() {
               <table className="w-full text-left">
                 <thead className="bg-gray-100 text-gray-600 text-xs uppercase font-semibold">
                   <tr>
-                    <th className="px-6 py-3">ক্যাটাগরি</th>
-                    <th className="px-6 py-3 text-right">পরিমাণ</th>
-                    <th className="px-6 py-3 text-right">শতাংশ</th>
-                    <th className="px-6 py-3">গ্রাফ</th>
+                    <th className="px-4 sm:px-6 py-3 sm:py-4">ক্যাটাগরি</th>
+                    <th className="px-4 sm:px-6 py-3 sm:py-4 text-right">পরিমাণ</th>
+                    <th className="px-4 sm:px-6 py-3 sm:py-4 text-right">শতাংশ</th>
+                    <th className="px-4 sm:px-6 py-3 sm:py-4">গ্রাফ</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {expensesByCategory.length === 0 ? (
                     <tr>
-                      <td colSpan="4" className="px-6 py-8 text-center text-gray-500">
+                      <td colSpan="4" className="px-4 sm:px-6 py-8 text-center text-gray-500">
                         কোনো খরচ পাওয়া যায়নি
                       </td>
                     </tr>
@@ -314,12 +314,12 @@ export default function ReportsPage() {
                       const colors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-500', 'bg-blue-500'];
                       return (
                         <tr key={index} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 font-medium text-gray-900">{item.category}</td>
-                          <td className="px-6 py-4 text-right font-medium text-red-600">
+                          <td className="px-4 sm:px-6 py-3 sm:py-4 font-medium text-gray-900">{item.category}</td>
+                          <td className="px-4 sm:px-6 py-3 sm:py-4 text-right font-medium text-red-600">
                             ৳ {item.amount.toFixed(2)}
                           </td>
-                          <td className="px-6 py-4 text-right text-gray-600">{percentage}%</td>
-                          <td className="px-6 py-4">
+                          <td className="px-4 sm:px-6 py-3 sm:py-4 text-right text-gray-600">{percentage}%</td>
+                          <td className="px-4 sm:px-6 py-3 sm:py-4">
                             <div className="w-full bg-gray-100 rounded-full h-2">
                               <div
                                 className={`${colors[index % colors.length]} h-2 rounded-full`}
@@ -340,4 +340,3 @@ export default function ReportsPage() {
     </div>
   );
 }
-

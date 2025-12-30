@@ -198,10 +198,12 @@ export default function ProductsPage() {
     }
   };
 
-  const filteredProducts = products.filter(item => 
-    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.category?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProducts = products.filter(item => {
+    const name = (item.name || "").toLowerCase();
+    const category = (item.category || "").toLowerCase();
+    const query = (searchTerm || "").toLowerCase();
+    return name.includes(query) || category.includes(query);
+  });
 
   return (
     <div className="space-y-6">
@@ -221,13 +223,13 @@ export default function ProductsPage() {
       </div>
 
       {/* Search */}
-      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+      <div className="bg-white p-3 sm:p-4 rounded-xl border border-gray-200 shadow-sm">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
           <input
             type="text"
             placeholder="পণ্যের নাম দিয়ে খুঁজুন..."
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -235,13 +237,13 @@ export default function ProductsPage() {
       </div>
 
       {/* Products Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
         {isLoading ? (
-          <div className="col-span-full flex justify-center py-12">
+          <div className="col-span-full flex justify-center py-8 sm:py-12">
             <Loader2 className="animate-spin text-indigo-600" size={32} />
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div className="col-span-full text-center py-12 text-gray-500 bg-white rounded-xl border border-dashed border-gray-300">
+          <div className="col-span-full text-center py-8 sm:py-12 text-gray-500 bg-white rounded-xl border border-dashed border-gray-300">
             <Package size={48} className="mx-auto mb-4 text-gray-300" />
             <p>কোনো পণ্য পাওয়া যায়নি</p>
           </div>
@@ -261,8 +263,8 @@ export default function ProductsPage() {
                 </div>
               </div>
               
-              <div className="p-4 flex-1 flex flex-col">
-                <h3 className="font-bold text-gray-900 mb-1">{product.name}</h3>
+              <div className="p-3 sm:p-4 flex-1 flex flex-col">
+                <h3 className="font-bold text-gray-900 mb-1 text-base sm:text-lg truncate">{product.name}</h3>
                 <p className="text-sm text-gray-500 line-clamp-2 mb-3 flex-1">{product.description}</p>
                 
                 <div className="flex items-end justify-between mt-auto pt-3 border-t border-gray-100">
@@ -279,7 +281,7 @@ export default function ProductsPage() {
                 </div>
               </div>
 
-              <div className="bg-gray-50 px-4 py-3 border-t border-gray-100 flex justify-between items-center">
+              <div className="bg-gray-50 px-3 sm:px-4 py-3 border-t border-gray-100 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                 <button 
                   onClick={() => router.push(`/dashboard/products/${product._id}`)}
                   className="text-blue-600 hover:text-blue-800 p-1.5 hover:bg-blue-50 rounded-lg transition-colors"
@@ -351,12 +353,12 @@ export default function ProductsPage() {
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500"
                 placeholder="যেমন: ভ্যানিলা কেক"
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">বিক্রয় মূল্য *</label>
                 <input
@@ -365,7 +367,7 @@ export default function ProductsPage() {
                   name="price"
                   value={formData.price}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500"
                   placeholder="0.00"
                 />
               </div>
@@ -376,20 +378,20 @@ export default function ProductsPage() {
                   name="costPrice"
                   value={formData.costPrice}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500"
                   placeholder="0.00"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">ক্যাটাগরি</label>
                 <select
                   name="category"
                   value={formData.category}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white"
+                  className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white"
                 >
                   <option value="Cake">কেক (Cake)</option>
                   <option value="Laddu">লাড্ডু (Laddu)</option>
@@ -410,7 +412,7 @@ export default function ProductsPage() {
                   name="unit"
                   value={formData.unit}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white"
+                  className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white"
                 >
                   <option value="pcs">পিস (pcs)</option>
                   <option value="kg">কেজি (kg)</option>
@@ -430,7 +432,7 @@ export default function ProductsPage() {
                 name="description"
                 value={formData.description}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500"
                 rows={3}
                 placeholder="পণ্যের বিস্তারিত বিবরণ..."
               />

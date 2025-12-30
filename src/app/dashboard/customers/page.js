@@ -151,10 +151,12 @@ export default function CustomersPage() {
     }
   };
 
-  const filteredCustomers = customers.filter(customer => 
-    customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.phone.includes(searchTerm)
-  );
+  const filteredCustomers = customers.filter(customer => {
+    const name = (customer.name || "").toLowerCase();
+    const phone = customer.phone || "";
+    const query = (searchTerm || "").toLowerCase();
+    return name.includes(query) || phone.includes(searchTerm || "");
+  });
 
   return (
     <div className="space-y-6">
@@ -175,13 +177,13 @@ export default function CustomersPage() {
 
       {/* Search and List */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-gray-200 bg-gray-50 flex items-center gap-4">
-          <div className="relative flex-1 max-w-md">
+        <div className="p-4 border-b border-gray-200 bg-gray-50 flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
             <input
               type="text"
               placeholder="নাম বা মোবাইল নম্বর দিয়ে খুঁজুন..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -192,31 +194,31 @@ export default function CustomersPage() {
           <table className="w-full text-left">
             <thead className="bg-gray-100 text-gray-600 text-xs uppercase font-semibold">
               <tr>
-                <th className="px-6 py-4">নাম</th>
-                <th className="px-6 py-4">মোবাইল</th>
-                <th className="px-6 py-4">ঠিকানা</th>
-                <th className="px-6 py-4">নোট</th>
-                <th className="px-6 py-4">বাকি</th>
-                <th className="px-6 py-4 text-right">অ্যাকশন</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-4">নাম</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-4">মোবাইল</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-4">ঠিকানা</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-4">নোট</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-4">বাকি</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-4 text-right">অ্যাকশন</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {isLoading ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center">
+                  <td colSpan="6" className="px-4 sm:px-6 py-12 text-center">
                     <Loader2 className="animate-spin mx-auto text-indigo-600" size={32} />
                   </td>
                 </tr>
               ) : filteredCustomers.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan="6" className="px-4 sm:px-6 py-12 text-center text-gray-500">
                     কোনো কাস্টমার পাওয়া যায়নি
                   </td>
                 </tr>
               ) : (
                 filteredCustomers.map((customer) => (
                   <tr key={customer._id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4">
+                    <td className="px-4 sm:px-6 py-3 sm:py-4">
                       <div className="flex items-center">
                         <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 mr-3">
                           <User size={16} />
@@ -224,25 +226,25 @@ export default function CustomersPage() {
                         <span className="font-medium text-gray-900">{customer.name}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-600">
                       <div className="flex items-center">
                         <Phone size={14} className="mr-2 text-gray-400" />
                         {customer.phone}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-600">
                       <div className="flex items-center">
                         <MapPin size={14} className="mr-2 text-gray-400" />
                         {customer.address || "-"}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-500">
                       {customer.notes || "-"}
                     </td>
-                    <td className="px-6 py-4 font-medium text-red-600">
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 font-medium text-red-600">
                       {customer.totalDue && customer.totalDue > 0 ? `৳ ${customer.totalDue.toLocaleString('en-BD', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "-"}
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-right">
                       <div className="flex justify-end gap-2">
                         <Link
                           href={`/dashboard/customers/${customer._id}`}
@@ -297,7 +299,7 @@ export default function CustomersPage() {
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500"
                   placeholder="গ্রাহকের নাম"
                 />
               </div>
@@ -312,7 +314,7 @@ export default function CustomersPage() {
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500"
                   placeholder="01XXXXXXXXX"
                 />
               </div>
@@ -327,7 +329,7 @@ export default function CustomersPage() {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500"
                   placeholder="example@email.com"
                 />
               </div>
@@ -341,7 +343,7 @@ export default function CustomersPage() {
                   name="address"
                   value={formData.address}
                   onChange={handleInputChange}
-                  className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500"
                   rows={2}
                   placeholder="পূর্ণ ঠিকানা..."
                 />
@@ -356,7 +358,7 @@ export default function CustomersPage() {
                   name="notes"
                   value={formData.notes}
                   onChange={handleInputChange}
-                  className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500"
                   rows={2}
                   placeholder="অতিরিক্ত তথ্য..."
                 />
