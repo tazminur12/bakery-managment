@@ -34,6 +34,8 @@ export default function EmployeesPage() {
     phone: "",
     role: "Baker / Production Staff",
     salary: "",
+    salaryPeriod: "monthly", // monthly, weekly, daily, custom
+    salaryDays: "", // for custom period
     joiningDate: new Date().toISOString().split("T")[0],
     nid: "",
     address: "",
@@ -135,6 +137,8 @@ export default function EmployeesPage() {
       phone: employee.phone,
       role: employee.role,
       salary: employee.salary,
+      salaryPeriod: employee.salaryPeriod || "monthly",
+      salaryDays: employee.salaryDays || "",
       joiningDate: new Date(employee.joiningDate).toISOString().split("T")[0],
       nid: employee.nid || "",
       address: employee.address || "",
@@ -295,7 +299,15 @@ export default function EmployeesPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <CreditCard size={16} className="text-gray-400" />
-                    <span className="font-medium text-gray-900">৳ {employee.salary.toLocaleString()}</span>
+                    <span className="font-medium text-gray-900">
+                      ৳ {employee.salary.toLocaleString()}
+                      <span className="text-xs text-gray-500 ml-1">
+                        ({employee.salaryPeriod === "monthly" ? "মাসিক" : 
+                          employee.salaryPeriod === "weekly" ? "সাপ্তাহিক" : 
+                          employee.salaryPeriod === "daily" ? "দৈনিক" : 
+                          `${employee.salaryDays || ""} দিন`})
+                      </span>
+                    </span>
                   </div>
                 </div>
               </div>
@@ -400,7 +412,7 @@ export default function EmployeesPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">বেতন (মাসিক) *</label>
+                <label className="text-sm font-medium text-gray-700">বেতন পরিমাণ *</label>
                 <input
                   required
                   type="number"
@@ -411,6 +423,39 @@ export default function EmployeesPage() {
                   placeholder="0.00"
                 />
               </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">বেতন পিরিয়ড *</label>
+                <select
+                  required
+                  name="salaryPeriod"
+                  value={formData.salaryPeriod}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white"
+                >
+                  <option value="monthly">মাসিক (Monthly)</option>
+                  <option value="weekly">সাপ্তাহিক (Weekly)</option>
+                  <option value="daily">দৈনিক (Daily)</option>
+                  <option value="custom">কাস্টম দিন (Custom Days)</option>
+                </select>
+              </div>
+
+              {formData.salaryPeriod === "custom" && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">দিন সংখ্যা *</label>
+                  <input
+                    required={formData.salaryPeriod === "custom"}
+                    type="number"
+                    min="1"
+                    name="salaryDays"
+                    value={formData.salaryDays}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    placeholder="যেমন: 15, 20, 30"
+                  />
+                  <p className="text-xs text-gray-500">কত দিন পর পর বেতন দেওয়া হবে</p>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">যোগদানের তারিখ *</label>

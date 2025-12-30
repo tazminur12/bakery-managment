@@ -273,15 +273,15 @@ export default function SalesPage() {
             fetchCustomers();
             setIsAddOpen(true);
           }}
-          className="flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          className="flex items-center justify-center px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm sm:text-base"
         >
-          <Plus size={20} className="mr-2" />
+          <Plus size={18} className="mr-2" />
           নতুন বিক্রয়
         </button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 rounded-full bg-blue-100 text-blue-600">
@@ -330,8 +330,8 @@ export default function SalesPage() {
 
       {/* Sales List */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-gray-200 bg-gray-50 flex items-center gap-4">
-          <div className="relative flex-1 max-w-md">
+        <div className="p-4 border-b border-gray-200 bg-gray-50">
+          <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
             <input
               type="text"
@@ -343,7 +343,8 @@ export default function SalesPage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-gray-100 text-gray-600 text-xs uppercase font-semibold">
               <tr>
@@ -420,11 +421,80 @@ export default function SalesPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden divide-y divide-gray-200">
+          {isLoading ? (
+            <div className="p-12 text-center">
+              <Loader2 className="animate-spin mx-auto text-indigo-600" size={32} />
+            </div>
+          ) : filteredSales.length === 0 ? (
+            <div className="p-12 text-center text-gray-500">
+              কোনো বিক্রয় তথ্য পাওয়া যায়নি
+            </div>
+          ) : (
+            filteredSales.map((sale) => (
+              <div key={sale._id} className="p-4 space-y-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900">{sale.customerName}</h3>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {new Date(sale.date).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">
+                    ৳{sale.totalAmount}
+                  </span>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <span className="text-gray-500">আইটেম:</span>
+                    <span className="ml-2 text-gray-900">{sale.items.length} টি</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">পেমেন্ট:</span>
+                    <span className="ml-2 text-gray-900">{sale.paymentMethod}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">জমা:</span>
+                    <span className="ml-2 text-green-600 font-medium">৳{sale.paidAmount}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">বাকি:</span>
+                    <span className={`ml-2 font-medium ${sale.dueAmount > 0 ? 'text-red-600' : 'text-gray-500'}`}>
+                      {sale.dueAmount > 0 ? `৳${sale.dueAmount}` : '-'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  {sale.dueAmount > 0 && (
+                    <button
+                      onClick={() => handlePayClick(sale)}
+                      className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      <CheckCircle size={16} />
+                      পরিশোধ
+                    </button>
+                  )}
+                  <Link
+                    href={`/dashboard/sales/${sale._id}`}
+                    className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors"
+                  >
+                    <Eye size={16} />
+                    দেখুন
+                  </Link>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
 
       {/* Add Sale Modal */}
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-full max-w-2xl max-h-[95vh] overflow-y-auto mx-2 sm:mx-auto">
           <DialogHeader>
             <DialogTitle>নতুন বিক্রয় এন্ট্রি</DialogTitle>
           </DialogHeader>
@@ -453,12 +523,12 @@ export default function SalesPage() {
                   </div>
                 </div>
               )}
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <div className="flex-1 relative">
                   <input
                     type="text"
                     placeholder="পণ্য খুঁজুন..."
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 text-base"
                     value={productSearch}
                     onChange={(e) => {
                       setProductSearch(e.target.value);
@@ -469,138 +539,217 @@ export default function SalesPage() {
                   />
                   
                   {openCombobox && productSearch && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                      {products.filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase())).map((product) => (
-                        <div
-                          key={product._id}
-                          className="px-3 py-2 text-sm cursor-pointer hover:bg-indigo-50 flex justify-between items-center"
-                          onClick={() => {
-                            setSelectedProduct(product);
-                            setProductSearch(product.name);
-                            setOpenCombobox(false);
-                          }}
-                        >
-                          <div className="flex flex-col">
-                            <span>{product.name}</span>
-                            <span className="text-xs text-gray-500">
-                              স্টক: {product.stock !== undefined && product.stock !== null ? `${product.stock} ${product.unit || 'টি'}` : 'স্টক ট্র্যাক করা হয় না'}
-                            </span>
+                    <>
+                      <div 
+                        className="fixed inset-0 z-10" 
+                        onClick={() => setOpenCombobox(false)} 
+                      />
+                      <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                        {products.filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase())).map((product) => (
+                          <div
+                            key={product._id}
+                            className="px-3 py-2.5 text-sm cursor-pointer hover:bg-indigo-50 flex justify-between items-center"
+                            onClick={() => {
+                              setSelectedProduct(product);
+                              setProductSearch(product.name);
+                              setOpenCombobox(false);
+                            }}
+                          >
+                            <div className="flex flex-col flex-1 min-w-0">
+                              <span className="truncate">{product.name}</span>
+                              <span className="text-xs text-gray-500">
+                                স্টক: {product.stock !== undefined && product.stock !== null ? `${product.stock} ${product.unit || 'টি'}` : 'স্টক ট্র্যাক করা হয় না'}
+                              </span>
+                            </div>
+                            <span className="text-gray-500 ml-2 flex-shrink-0">৳{product.price}</span>
                           </div>
-                          <span className="text-gray-500">৳{product.price}</span>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    </>
                   )}
                 </div>
                 
-                <input
-                  type="number"
-                  min="1"
-                  className="w-24 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
-                  value={itemQuantity}
-                  onChange={(e) => setItemQuantity(e.target.value)}
-                  placeholder="Qty"
-                />
-                
-                <button
-                  type="button"
-                  onClick={addToCart}
-                  disabled={!selectedProduct}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
-                >
-                  যোগ করুন
-                </button>
+                <div className="flex gap-2 sm:gap-3">
+                  <input
+                    type="number"
+                    min="1"
+                    className="w-20 sm:w-24 px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 text-base"
+                    value={itemQuantity}
+                    onChange={(e) => setItemQuantity(e.target.value)}
+                    placeholder="Qty"
+                  />
+                  
+                  <button
+                    type="button"
+                    onClick={addToCart}
+                    disabled={!selectedProduct}
+                    className="px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 text-sm sm:text-base whitespace-nowrap"
+                  >
+                    যোগ করুন
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* Cart Items */}
             {cartItems.length > 0 && (
               <div className="border rounded-lg overflow-hidden">
-                <table className="w-full text-sm text-left">
-                  <thead className="bg-gray-100 text-gray-600">
-                    <tr>
-                      <th className="px-4 py-2">পণ্য</th>
-                      <th className="px-4 py-2">দাম</th>
-                      <th className="px-4 py-2">পরিমাণ</th>
-                      <th className="px-4 py-2">মোট</th>
-                      <th className="px-4 py-2"></th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {cartItems.map((item, index) => {
-                      const product = products.find(p => p._id === item._id);
-                      const currentStock = product?.stock;
-                      const isLowStock = currentStock !== undefined && currentStock !== null && currentStock < item.quantity;
-                      
-                      return (
-                        <tr key={index} className={isLowStock ? "bg-red-50" : ""}>
-                          <td className="px-4 py-2">
-                            <div>
-                              <span className="font-medium">{item.name}</span>
-                              {currentStock !== undefined && currentStock !== null && (
-                                <p className="text-xs text-gray-500 mt-0.5">
-                                  স্টক: <span className={isLowStock ? "text-red-600 font-medium" : ""}>
-                                    {currentStock} {item.unit}
-                                  </span>
-                                </p>
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-4 py-2">৳{item.price}</td>
-                          <td className="px-4 py-2">
-                            <span className={isLowStock ? "text-red-600 font-medium" : ""}>
-                              {item.quantity} {item.unit}
-                            </span>
-                            {isLowStock && (
-                              <p className="text-xs text-red-600 mt-0.5">স্টক অপর্যাপ্ত!</p>
-                            )}
-                          </td>
-                          <td className="px-4 py-2 font-medium">৳{item.subtotal}</td>
-                          <td className="px-4 py-2 text-right">
-                            <button
-                              type="button"
-                              onClick={() => removeFromCart(index)}
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                  <tfoot className="bg-gray-50">
-                    <tr>
-                      <td colSpan="3" className="px-4 py-2 text-right">উপমোট:</td>
-                      <td className="px-4 py-2">৳{calculateSubtotal().toFixed(2)}</td>
-                      <td></td>
-                    </tr>
-                    {discount && parseFloat(discount) > 0 && (
+                {/* Desktop Table View */}
+                <div className="hidden sm:block overflow-x-auto">
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-gray-100 text-gray-600">
                       <tr>
-                        <td colSpan="3" className="px-4 py-2 text-right text-red-600">ছাড়:</td>
-                        <td className="px-4 py-2 text-red-600">-৳{calculateDiscount().toFixed(2)}</td>
+                        <th className="px-4 py-2">পণ্য</th>
+                        <th className="px-4 py-2">দাম</th>
+                        <th className="px-4 py-2">পরিমাণ</th>
+                        <th className="px-4 py-2">মোট</th>
+                        <th className="px-4 py-2"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {cartItems.map((item, index) => {
+                        const product = products.find(p => p._id === item._id);
+                        const currentStock = product?.stock;
+                        const isLowStock = currentStock !== undefined && currentStock !== null && currentStock < item.quantity;
+                        
+                        return (
+                          <tr key={index} className={isLowStock ? "bg-red-50" : ""}>
+                            <td className="px-4 py-2">
+                              <div>
+                                <span className="font-medium">{item.name}</span>
+                                {currentStock !== undefined && currentStock !== null && (
+                                  <p className="text-xs text-gray-500 mt-0.5">
+                                    স্টক: <span className={isLowStock ? "text-red-600 font-medium" : ""}>
+                                      {currentStock} {item.unit}
+                                    </span>
+                                  </p>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-4 py-2">৳{item.price}</td>
+                            <td className="px-4 py-2">
+                              <span className={isLowStock ? "text-red-600 font-medium" : ""}>
+                                {item.quantity} {item.unit}
+                              </span>
+                              {isLowStock && (
+                                <p className="text-xs text-red-600 mt-0.5">স্টক অপর্যাপ্ত!</p>
+                              )}
+                            </td>
+                            <td className="px-4 py-2 font-medium">৳{item.subtotal}</td>
+                            <td className="px-4 py-2 text-right">
+                              <button
+                                type="button"
+                                onClick={() => removeFromCart(index)}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                    <tfoot className="bg-gray-50">
+                      <tr>
+                        <td colSpan="3" className="px-4 py-2 text-right">উপমোট:</td>
+                        <td className="px-4 py-2">৳{calculateSubtotal().toFixed(2)}</td>
                         <td></td>
                       </tr>
+                      {discount && parseFloat(discount) > 0 && (
+                        <tr>
+                          <td colSpan="3" className="px-4 py-2 text-right text-red-600">ছাড়:</td>
+                          <td className="px-4 py-2 text-red-600">-৳{calculateDiscount().toFixed(2)}</td>
+                          <td></td>
+                        </tr>
+                      )}
+                      <tr className="font-bold border-t-2 border-gray-300">
+                        <td colSpan="3" className="px-4 py-2 text-right">সর্বমোট:</td>
+                        <td className="px-4 py-2">৳{calculateTotal().toFixed(2)}</td>
+                        <td></td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="sm:hidden divide-y divide-gray-200">
+                  {cartItems.map((item, index) => {
+                    const product = products.find(p => p._id === item._id);
+                    const currentStock = product?.stock;
+                    const isLowStock = currentStock !== undefined && currentStock !== null && currentStock < item.quantity;
+                    
+                    return (
+                      <div key={index} className={`p-3 ${isLowStock ? "bg-red-50" : ""}`}>
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-gray-900 truncate">{item.name}</p>
+                            {currentStock !== undefined && currentStock !== null && (
+                              <p className="text-xs text-gray-500 mt-0.5">
+                                স্টক: <span className={isLowStock ? "text-red-600 font-medium" : ""}>
+                                  {currentStock} {item.unit}
+                                </span>
+                              </p>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeFromCart(index)}
+                            className="text-red-500 hover:text-red-700 ml-2 flex-shrink-0"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                        <div className="flex justify-between items-center text-sm">
+                          <div>
+                            <span className="text-gray-500">দাম: </span>
+                            <span className="text-gray-900">৳{item.price}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">পরিমাণ: </span>
+                            <span className={isLowStock ? "text-red-600 font-medium" : "text-gray-900"}>
+                              {item.quantity} {item.unit}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">মোট: </span>
+                            <span className="font-medium text-gray-900">৳{item.subtotal}</span>
+                          </div>
+                        </div>
+                        {isLowStock && (
+                          <p className="text-xs text-red-600 mt-1">স্টক অপর্যাপ্ত!</p>
+                        )}
+                      </div>
+                    );
+                  })}
+                  <div className="p-3 bg-gray-50 space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">উপমোট:</span>
+                      <span className="font-medium">৳{calculateSubtotal().toFixed(2)}</span>
+                    </div>
+                    {discount && parseFloat(discount) > 0 && (
+                      <div className="flex justify-between text-sm text-red-600">
+                        <span>ছাড়:</span>
+                        <span>-৳{calculateDiscount().toFixed(2)}</span>
+                      </div>
                     )}
-                    <tr className="font-bold border-t-2 border-gray-300">
-                      <td colSpan="3" className="px-4 py-2 text-right">সর্বমোট:</td>
-                      <td className="px-4 py-2">৳{calculateTotal().toFixed(2)}</td>
-                      <td></td>
-                    </tr>
-                  </tfoot>
-                </table>
+                    <div className="flex justify-between text-base font-bold border-t pt-2">
+                      <span>সর্বমোট:</span>
+                      <span>৳{calculateTotal().toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
             {/* Customer & Payment Info */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2 relative">
                 <label className="text-sm font-medium text-gray-700">গ্রাহকের নাম</label>
                 <div className="relative">
                   <input
                     type="text"
                     placeholder="গ্রাহক নির্বাচন করুন বা টাইপ করুন..."
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 pr-10"
+                    className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 pr-10 text-base"
                     value={customerName}
                     onChange={(e) => {
                       setCustomerName(e.target.value);
@@ -699,7 +848,7 @@ export default function SalesPage() {
                 <label className="text-sm font-medium text-gray-700">তারিখ</label>
                 <input
                   type="date"
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 text-base"
                   value={saleDate}
                   onChange={(e) => setSaleDate(e.target.value)}
                 />
@@ -710,7 +859,7 @@ export default function SalesPage() {
                   type="number"
                   min="0"
                   step="0.01"
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 text-base"
                   value={discount}
                   onChange={(e) => setDiscount(e.target.value)}
                   placeholder="0.00"
@@ -720,7 +869,7 @@ export default function SalesPage() {
                 <label className="text-sm font-medium text-gray-700">জমা (Paid)</label>
                 <input
                   type="number"
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 text-base"
                   value={paidAmount}
                   onChange={(e) => setPaidAmount(e.target.value)}
                   placeholder="0.00"
@@ -729,7 +878,7 @@ export default function SalesPage() {
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">পেমেন্ট মেথড</label>
                 <select
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white"
+                  className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white text-base"
                   value={paymentMethod}
                   onChange={(e) => setPaymentMethod(e.target.value)}
                 >
@@ -741,18 +890,29 @@ export default function SalesPage() {
               </div>
             </div>
 
-            <DialogFooter>
+            <div className="col-span-full space-y-2">
+              <label className="text-sm font-medium text-gray-700">নোট (ঐচ্ছিক)</label>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={3}
+                className="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 text-base"
+                placeholder="অতিরিক্ত তথ্য বা নোট..."
+              />
+            </div>
+
+            <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
               <button
                 type="button"
                 onClick={() => setIsAddOpen(false)}
-                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+                className="w-full sm:w-auto px-4 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg text-base"
               >
                 বাতিল
               </button>
               <button
                 type="submit"
                 disabled={loading || cartItems.length === 0}
-                className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+                className="w-full sm:w-auto flex items-center justify-center px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 text-base"
               >
                 {loading ? (
                   <div className="flex items-center">
@@ -768,7 +928,7 @@ export default function SalesPage() {
 
       {/* Payment Dialog */}
       <Dialog open={isPaymentOpen} onOpenChange={setIsPaymentOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="w-full max-w-md max-h-[95vh] overflow-y-auto mx-2 sm:mx-auto">
           <DialogHeader>
             <DialogTitle>বাকি পরিশোধ করুন</DialogTitle>
           </DialogHeader>
@@ -803,7 +963,7 @@ export default function SalesPage() {
                   max={selectedSale.dueAmount}
                   value={paymentAmount}
                   onChange={(e) => setPaymentAmount(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-base"
                   placeholder="পরিমাণ লিখুন"
                   required
                 />
@@ -819,7 +979,7 @@ export default function SalesPage() {
                 <select
                   value={paymentModalMethod}
                   onChange={(e) => setPaymentModalMethod(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-base"
                 >
                   <option value="Cash">Cash</option>
                   <option value="Bank Transfer">Bank Transfer</option>
@@ -838,23 +998,23 @@ export default function SalesPage() {
                   value={paymentNotes}
                   onChange={(e) => setPaymentNotes(e.target.value)}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-base"
                   placeholder="ট্রানজেকশন বা নোট লিখুন"
                 />
               </div>
 
-              <DialogFooter>
+              <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
                 <button
                   type="button"
                   onClick={() => setIsPaymentOpen(false)}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                  className="w-full sm:w-auto px-4 py-2.5 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors text-base"
                 >
                   বাতিল
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full sm:w-auto px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-base"
                 >
                   {loading ? "পরিশোধ হচ্ছে..." : "পরিশোধ করুন"}
                 </button>

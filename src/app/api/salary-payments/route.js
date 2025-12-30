@@ -13,7 +13,7 @@ export async function POST(request) {
     }
 
     const body = await request.json();
-    const { employeeId, amount, paymentMethod, paymentDate, month, year, notes } = body;
+    const { employeeId, amount, paymentMethod, paymentDate, month, year, notes, paymentType } = body;
 
     if (!employeeId || !amount || amount <= 0) {
       return NextResponse.json(
@@ -52,6 +52,7 @@ export async function POST(request) {
       month: paymentMonth,
       year: paymentYear,
       notes: notes || "",
+      paymentType: paymentType || "full", // "full" or "advance"
       createdAt: new Date(),
       createdBy: {
         id: session.user.id,
